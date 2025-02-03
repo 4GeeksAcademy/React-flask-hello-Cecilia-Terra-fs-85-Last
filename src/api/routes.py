@@ -52,3 +52,37 @@ def get_profile():
     current_user = get_jwt_identity()
     print(current_user)
     return jsonify(logged_in_as=current_user), 200
+
+
+#verificamos si el token existe
+@api.route("/token-verify", methods=["GET"])
+@jwt_required()#seguiridad
+def token_verify():#defino token verify, si el token aparece, es correcto
+    return jsonify({"msg": "Token is valid"}), 200
+
+
+
+
+#crear un nuevo registro de usuario, le pido email y contraseña, no puede haber dos iguales
+@api.route("/signup", methods=["POST"])
+def signup():
+    try:
+        email = request.json.get("email", None)
+        password = request.json.get("password", None)
+
+        if not email or not password:
+            return jsonify({"msg": "Email and password are required"}), 400
+
+        # Verificar si el usuario ya existe
+        existing_user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()#buscar un email unico, si existe, doy error
+        if existing_user:
+            return jsonify({"msg": "User already exists"}), 400
+
+        # Crear nuevo usuario
+        new_user = User(email=email, password=password)  
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({"msg": "User created successfully"}), 201
+    except Exception as e:
+        return jsonify({"msg": "Error creating user", "error": str(e)}), 500

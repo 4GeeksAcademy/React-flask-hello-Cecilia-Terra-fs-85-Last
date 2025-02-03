@@ -12,13 +12,18 @@ import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import { Profile } from "./pages/profile";
 
+import SignupForm from "./component/SignupForm";
+import { LoginForm } from "./component/LoginForm";
+import Private from "./component/Private";
+
+
 //create your first component
 const Layout = () => {
     //the basename is used when your project is published in a subdirectory and not in the root of the domain
     // you can set the basename on the .env file located at the root of this project, E.g: BASENAME=/react-hello-webapp/
     const basename = process.env.BASENAME || "";
 
-    if(!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL/ >;
+    if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     return (
         <div>
@@ -31,6 +36,9 @@ const Layout = () => {
                         <Route element={<Demo />} path="/demo" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} />
+                        <Route element={<SignupForm />} path="/signup" />
+                        <Route element={<LoginForm />} path="/login" />
+                        <Route element={<Private />} path="/private" />
                     </Routes>
                     <Footer />
                 </ScrollToTop>

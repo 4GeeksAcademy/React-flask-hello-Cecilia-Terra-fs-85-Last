@@ -14,7 +14,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			token: null,
+
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -41,7 +43,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const result = await response.json();
 
 					if (response.status === 200) {
-						localStorage.setItem("token", result.access_token)
+						sessionStorage.setItem("token", result.access_token)//guardamos
 						return true
 					}
 					console.log(result);
@@ -54,7 +56,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			getProfile: async () => {
 				let token = localStorage.getItem("token")
 				try {
-					const response = await fetch("https://potential-spork-7pvx7qxxxj9c64x-3001.app.github.dev/api/profile", {
+					const response = await fetch("https://expert-fortnight-x59jvx4wr9j73v46v-3000.app.github.dev/api/profile", {
 						method: "GET",
 						headers: {
 							"Authorization": `Bearer ${token}`
@@ -66,19 +68,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error(error);
 				};
 			},
+
+
 			tokenVerify: async () => {
-				const token = localStorage.getItem("token");
+				const token = sessionStorage.getItem("token");// verifico el token al iniciar la sesion
 				if (!token) {
-					setStore({ auth: false });
+					setStore({ auth: false });//si no recibo token devuelvo falso no access
 					return false;
 				}
-
 				try {
 					const response = await fetch(process.env.BACKEND_URL + "/api/token-verify", {
 						method: "GET",
 						headers: {
-							"Authorization": `Bearer ${token}`
-						},
+							"Authorization": `Bearer ${token}`//espero respuesta de que el token exise entonces si el estado de la respuesta
+						},                                    // es verdarero, entonces devuelvo true y hago setStore para auth:true
 					});
 					if (response.status === 200) {
 						setStore({ auth: true });
@@ -91,7 +94,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.error("Error verificando el token:", error);
 					setStore({ auth: false });
-					localStorage.removeItem("token");
+					sessionStorage.removeItem("token");//sessionstorage, para verficar en el inicio de sesio, local general, sesion vinculado, da mas seguridad
 					return false;
 				}
 			},
@@ -99,10 +102,34 @@ const getState = ({ getStore, getActions, setStore }) => {
 			//la peticion en la funcion tokenVerify del front deberia actualizar un estado auth:
 			// },
 			logout: () => {
-				localStorage.removeItem("token");
-				setStore({ auth: false });
-				return true;
+				sessionStorage.removeItem("token");//almacendo en la sesion el token, borrarlo al cerrar sesion
+				setStore({ auth: false });//autenticacion falsa, setStore modifica a falso porque el token se borra
+				window.location.href = "/login";//redireccino al inicio de sessions
 			},
+
+
+			//registro de usuarios, obligatorio la accion de email y contraseña, metodo POST
+			signup: async (email, password) => {
+				const requestOptions = {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email, password })
+				};
+
+				try {
+					const response = await fetch(process.env.BACKEND_URL + "/api/signup", requestOptions);
+					const result = await response.json();
+
+					if (response.status === 201) {
+						return true;
+					}
+					console.log(result);
+				} catch (error) {
+					console.error("Error during signup:", error);
+				}
+				return false;
+			},
+
 
 			getMessage: async () => {
 				try {

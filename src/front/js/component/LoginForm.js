@@ -5,16 +5,16 @@ import { Link, useNavigate } from "react-router-dom";
 export const LoginForm = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const { store, actions } = useContext(Context)
+    const { actions } = useContext(Context)
     let navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault()
         let logged = await actions.login(email, password);
         console.log(logged);
-        
+
         if (logged) {
-            navigate("/profile")
+            navigate("/private")
         }
 
     }
