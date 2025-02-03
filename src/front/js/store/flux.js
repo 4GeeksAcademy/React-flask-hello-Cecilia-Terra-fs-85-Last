@@ -37,13 +37,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 				};
 
 				try {
-					const response = await fetch("https://potential-spork-7pvx7qxxxj9c64x-3001.app.github.dev/api/login", requestOptions);
+					const response = await fetch("https://expert-fortnight-x59jvx4wr9j73v46v-3001.app.github.dev/api/login", requestOptions);
 					const result = await response.json();
 
 					if (response.status === 200) {
 						localStorage.setItem("token", result.access_token)
 						return true
 					}
+					console.log(result);
+
 				} catch (error) {
 					console.error(error);
 					return false;
@@ -64,13 +66,44 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error(error);
 				};
 			},
-			tokenVerify:()=>{
-				//crear un nuevo endpoint que se llame verificacion de token
-				//la peticion en la funcion tokenVerify del front deberia actualizar un estado auth:
+			tokenVerify: async () => {
+				const token = localStorage.getItem("token");
+				if (!token) {
+					setStore({ auth: false });
+					return false;
+				}
+
+				try {
+					const response = await fetch(process.env.BACKEND_URL + "/api/token-verify", {
+						method: "GET",
+						headers: {
+							"Authorization": `Bearer ${token}`
+						},
+					});
+					if (response.status === 200) {
+						setStore({ auth: true });
+						return true;
+					} else {
+						setStore({ auth: false });
+						localStorage.removeItem("token");
+						return false;
+					}
+				} catch (error) {
+					console.error("Error verificando el token:", error);
+					setStore({ auth: false });
+					localStorage.removeItem("token");
+					return false;
+				}
 			},
-			logout:()=>{
-				//borrar el token del localStorage
+			//crear un nuevo endpoint que se llame verificacion de token
+			//la peticion en la funcion tokenVerify del front deberia actualizar un estado auth:
+			// },
+			logout: () => {
+				localStorage.removeItem("token");
+				setStore({ auth: false });
+				return true;
 			},
+
 			getMessage: async () => {
 				try {
 					// fetching data from the backend

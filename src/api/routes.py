@@ -33,12 +33,14 @@ def login():
         password = request.json.get("password", None)
         user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one()
 
-        if email == user.email or password == user.password:
-            access_token = create_access_token(identity=email)
-            return jsonify(access_token=access_token), 200
-            
+        if email == user.email and password == user.password:
+             access_token = create_access_token(identity=email)
+             return jsonify(access_token=access_token), 200
+        else:
+            return jsonify({"msg": "Bad email or password"}), 401
+       
     except:
-         return jsonify({"msg": "Bad email or password"}), 401
+         return jsonify({"msg": "Not found"}), 404
 
 
 # Protect a route with jwt_required, which will kick out requests
