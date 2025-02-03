@@ -11,7 +11,7 @@ const SignupForm = () => {
     async function handleSubmit(e) {
         e.preventDefault();
         let registered = await actions.signup(email, password);
-        
+
         if (registered) {
             navigate("/login");
         }
